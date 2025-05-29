@@ -19,7 +19,7 @@ pygame.mixer.music.play(-1)  # Loop forever
 WINDOWSIZE = (1600, 900)  # 16:9 aspect ratio for modern displays
 MOVESPEED = 0            # base movement speed
 MOUSESENSITIVITY = 0  # mouse sensitivity for camera control
-TARGET_FPS = 24         # target frame rate
+TARGET_FPS = 144        # target frame rate
 FRAME_TIME = 1.0 / TARGET_FPS  # time per frame in seconds
 mouse_x = 0
 mouse_y = 0
@@ -57,22 +57,57 @@ BLUE_BOX_LIFETIME = 60
 BLUE_BOX_SPAWN_CHANCE = 0.1
 def draw_cursor():
     global mouse_x, mouse_y, cursor_texture
+    
+    # Save current matrices and attributes
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    viewport = glGetIntegerv(GL_VIEWPORT)
+    glOrtho(0, viewport[2], viewport[3], 0, -1, 1)  # 2D orthographic projection
+    
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    
+    # Save states and disable depth test for 2D drawing
+    glPushAttrib(GL_ALL_ATTRIB_BITS)
+    glDisable(GL_DEPTH_TEST)
+    glDisable(GL_LIGHTING)
+    
+    # Enable blending for transparency
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    
+    # Enable texturing
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, cursor_texture)
+    
+    # Set color to white to show texture as is
     glColor4f(1, 1, 1, 1)
 
     x = mouse_x
     y = mouse_y
-
+    
+    # Draw cursor quad
     glBegin(GL_QUADS)
     glTexCoord2f(0, 0); glVertex2f(x, y)
-    glTexCoord2f(1, 0); glVertex2f(x + 40, y)
-    glTexCoord2f(1, 1); glVertex2f(x + 40, y + 40)
-    glTexCoord2f(0, 1); glVertex2f(x, y + 40)
+    glTexCoord2f(1, 0); glVertex2f(x + 32, y)
+    glTexCoord2f(1, 1); glVertex2f(x + 32, y + 32)
+    glTexCoord2f(0, 1); glVertex2f(x, y + 32)
     glEnd()
-
+    
+    # Clean up
     glBindTexture(GL_TEXTURE_2D, 0)
     glDisable(GL_TEXTURE_2D)
+    
+    # Restore previous states
+    glPopAttrib()
+    
+    # Restore matrices
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+    glPopMatrix()
 
 class Camera:
     def __init__(self):
@@ -222,7 +257,8 @@ def draw_grid():
     global metalreg, metal_reg_display_2
     # temporarily disable lighting for grid lines
     gl.glDisable(gl.GL_LIGHTING)
-    metal_reg_display_2.text = metalreg[random.randint(0, len(metalreg)-1)]
+    if random.randint(0,5) == 2:
+        metal_reg_display_2.text = metalreg[random.randint(0, len(metalreg)-1)]
     
     # set initial line properties
     gl.glColor3f(0.5, 0.5, 0.5)  # set default grid color to gray
@@ -303,7 +339,23 @@ def init():
     background_texture, texture_width, texture_height = load_texture('assets/img/checkerboard.png')
     background_texture_alt, _, _ = load_texture('assets/img/checkerboardmissing.png')
     overlay_texture, _, _ = load_texture('assets/img/checkerboardoverlay.png')
-    cursor_texture, _, _ = load_texture('assets/img/cursor.png')
+    
+    # Load cursor texture and verify it loaded correctly
+    try:
+        cursor_texture, cursor_width, cursor_height = load_texture('assets/img/cursor.png')
+        print(f"Cursor texture loaded successfully: ID={cursor_texture}, Size={cursor_width}x{cursor_height}")
+    except Exception as e:
+        print(f"Error loading cursor texture: {e}")
+        # Fallback to a simple generated texture if loading fails
+        cursor_texture = gl.glGenTextures(1)
+        gl.glBindTexture(gl.GL_TEXTURE_2D, cursor_texture)
+        # Create a simple white texture as fallback
+        pixel_data = [255, 255, 255, 255] * 16 * 16  # 16x16 white texture with alpha
+        gl.glTexImage2D(gl.GL_TEXTURE_2D, 0, gl.GL_RGBA, 16, 16, 0,
+                     gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, pixel_data)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
+        gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
+        print("Created fallback cursor texture")
     # store initial positions
     initial_positions['cube'] = list(ButtonCube.position)
     
@@ -921,6 +973,9 @@ def main():
     
     # initialize opengl state and resources
     init()
+    
+    # Hide the cursor
+    glutSetCursor(GLUT_CURSOR_NONE)
     
     # register callback functions
     glutDisplayFunc(display)
