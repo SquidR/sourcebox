@@ -1,2 +1,2 @@
 # sourcebox
-python/opengl implementation of INTERLOPER's sourcebox
+python/opengl implementation of interloper's sourcebox
