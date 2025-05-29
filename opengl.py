@@ -103,11 +103,11 @@ class Sphere(Shape):
         self.slices = slices
         self.stacks = stacks
         self.quadric = gluNewQuadric()
-        gluQuadricNormals(self.quadric, GLU_SMOOTH)  # Enable smooth normals
+        gluQuadricNormals(self.quadric, GLU_SMOOTH)  # enable smooth normals
 
     def render(self):
         self._pre_render()
-        gluSphere(self.quadric, self.size/2, self.slices, self.stacks)  # Use radius
+        gluSphere(self.quadric, self.size/2, self.slices, self.stacks)  # use radius
         self._post_render()
 
 class Cylinder(Shape):
@@ -142,7 +142,7 @@ class Pyramid(Shape):
     def render(self):
         self._pre_render()
         
-        # Calculate normal vectors for each face
+        # calculate normal vectors for each face
         front_normal = self._calculate_normal(
             [0, 0, 0],
             [self.size, 0, 0],
@@ -165,34 +165,34 @@ class Pyramid(Shape):
         )
         
         gl.glBegin(gl.GL_TRIANGLES)
-        # Front face
+        # front face
         gl.glNormal3f(*front_normal)
         gl.glVertex3f(0, 0, 0)
         gl.glVertex3f(self.size, 0, 0)
         gl.glVertex3f(self.size/2, self.size, self.size/2)
         
-        # Right face
+        # right face
         gl.glNormal3f(*right_normal)
         gl.glVertex3f(self.size, 0, 0)
         gl.glVertex3f(self.size, 0, self.size)
         gl.glVertex3f(self.size/2, self.size, self.size/2)
         
-        # Back face
+        # back face
         gl.glNormal3f(*back_normal)
         gl.glVertex3f(self.size, 0, self.size)
         gl.glVertex3f(0, 0, self.size)
         gl.glVertex3f(self.size/2, self.size, self.size/2)
         
-        # Left face
+        # left face
         gl.glNormal3f(*left_normal)
         gl.glVertex3f(0, 0, self.size)
         gl.glVertex3f(0, 0, 0)
         gl.glVertex3f(self.size/2, self.size, self.size/2)
         gl.glEnd()
         
-        # Base
+        # base
         gl.glBegin(gl.GL_QUADS)
-        gl.glNormal3f(0, -1, 0)  # Base normal points down
+        gl.glNormal3f(0, -1, 0)  # base normal points down
         gl.glVertex3f(0, 0, 0)
         gl.glVertex3f(self.size, 0, 0)
         gl.glVertex3f(self.size, 0, self.size)
@@ -206,14 +206,14 @@ class Pyramid(Shape):
         v1 = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]]
         v2 = [p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]]
         
-        # Cross product
+        # cross product
         normal = [
             v1[1] * v2[2] - v1[2] * v2[1],
             v1[2] * v2[0] - v1[0] * v2[2],
             v1[0] * v2[1] - v1[1] * v2[0]
         ]
         
-        # Normalize
+        # normalize
         length = (normal[0]**2 + normal[1]**2 + normal[2]**2)**0.5
         if length != 0:
             normal = [n/length for n in normal]
@@ -226,19 +226,19 @@ class Cone(Shape):
         self.height = height
         self.slices = slices
         self.quadric = gluNewQuadric()
-        gluQuadricNormals(self.quadric, GLU_SMOOTH)  # Enable smooth normals
+        gluQuadricNormals(self.quadric, GLU_SMOOTH)  # enable smooth normals
         self.rotation = rotation
 
     def render(self):
         self._pre_render()
         
-        # Draw the cone body
-        gluCylinder(self.quadric, self.size/2, 0, self.height, self.slices, 1)  # Use radius
+        # draw the cone body
+        gluCylinder(self.quadric, self.size/2, 0, self.height, self.slices, 1)  # use radius
         
-        # Draw the base circle
+        # draw the base circle
         gl.glPushMatrix()
-        gl.glRotatef(180, 1, 0, 0)  # Flip normal to point outward
-        gluDisk(self.quadric, 0, self.size/2, self.slices, 1)  # Draw filled circle
+        gl.glRotatef(180, 1, 0, 0)  # flip normal to point outward
+        gluDisk(self.quadric, 0, self.size/2, self.slices, 1)  # draw filled circle
         gl.glPopMatrix()
         
         self._post_render()

@@ -19,7 +19,7 @@ def load_texture(image_path):
     return texid, width, height
 
 def draw_background_quad(texture_id, apply_scale=True):
-    # Save current matrix mode and attributes
+    # save current matrix mode and attributes
     gl.glMatrixMode(gl.GL_PROJECTION)
     gl.glPushMatrix()
     gl.glLoadIdentity()
@@ -27,53 +27,49 @@ def draw_background_quad(texture_id, apply_scale=True):
     gl.glPushMatrix()
     gl.glLoadIdentity()
     
-    # Save states
+    # save states
     gl.glPushAttrib(gl.GL_ALL_ATTRIB_BITS)
     
-    # Disable depth testing and lighting for background
+    # disable depth testing and lighting for background
     gl.glDisable(gl.GL_DEPTH_TEST)
     gl.glDisable(gl.GL_LIGHTING)
     
-    # Enable texturing
+    # enable texturing
     gl.glEnable(gl.GL_TEXTURE_2D)
     gl.glBindTexture(gl.GL_TEXTURE_2D, texture_id)
     
-    # Set color to affect texture
-    gl.glColor4f(1.3, 1.3, 1.3, 1.0)  # Restore original brightness
+    gl.glColor4f(1.3, 1.3, 1.3, 1.0)
     
-    # Draw textured quad
     gl.glBegin(gl.GL_QUADS)
     if apply_scale:
-        # Original scaled version with proper aspect ratio
+        # original scaled version with proper aspect ratio
         target_aspect_ratio = 16.0 / 9.0
-        tex_height = 1.1  # Slightly larger than 1.0 to prevent seams
+        tex_height = 1.1
         tex_width = tex_height * target_aspect_ratio
         
-        # Calculate texture coordinate bounds
         left = 0.5 - (tex_width / 2)
         right = 0.5 + (tex_width / 2)
         bottom = 0.5 - (tex_height / 2)
         top = 0.5 + (tex_height / 2)
         
-        # Scale factor for the quad
+        # scale factor for the quad
         scale = 3
         
-        gl.glTexCoord2f(left, top); gl.glVertex2f(-scale, -scale)    # Bottom-left
-        gl.glTexCoord2f(right, top); gl.glVertex2f(scale, -scale)    # Bottom-right
-        gl.glTexCoord2f(right, bottom); gl.glVertex2f(scale, scale)  # Top-right
-        gl.glTexCoord2f(left, bottom); gl.glVertex2f(-scale, scale)  # Top-left
+        gl.glTexCoord2f(left, top); gl.glVertex2f(-scale, -scale)
+        gl.glTexCoord2f(right, top); gl.glVertex2f(scale, -scale)
+        gl.glTexCoord2f(right, bottom); gl.glVertex2f(scale, scale) 
+        gl.glTexCoord2f(left, bottom); gl.glVertex2f(-scale, scale)
     else:
-        # No scale version
         gl.glTexCoord2f(0.0, 1.0); gl.glVertex3f(-1.0, -1.0, -1.0)
         gl.glTexCoord2f(1.0, 1.0); gl.glVertex3f(1.0, -1.0, -1.0)
         gl.glTexCoord2f(1.0, 0.0); gl.glVertex3f(1.0, 1.0, -1.0)
         gl.glTexCoord2f(0.0, 0.0); gl.glVertex3f(-1.0, 1.0, -1.0)
     gl.glEnd()
     
-    # Restore states
+    # restore states
     gl.glPopAttrib()
     
-    # Restore matrices
+    # restore matrices
     gl.glMatrixMode(gl.GL_PROJECTION)
     gl.glPopMatrix()
     gl.glMatrixMode(gl.GL_MODELVIEW)
