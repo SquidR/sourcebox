@@ -640,7 +640,6 @@ def update_hover_animations():
     # update cube animation
     if cube_hover != prev_hover_states['cube']:  # hover state changed
         if cube_hover and not cone:  # just started hovering
-            # play click sound
             pygame.mixer.Sound('assets/sound/click.wav').play()
             hover_timers['cube'] = 0  # reset timer
             hover_scale['cube'] = HOVER_SCALE_MAX  # start at max scale
@@ -1035,7 +1034,7 @@ def aabb_ray_intersection(ray_origin, ray_dir, box_min, box_max):
     return True
 
 def mouse_click(button, state, x, y):
-    global cube, sphere, cone
+    global cube, sphere, cone, soundplay
     if button == GLUT_LEFT_BUTTON and state == GLUT_DOWN and not sphere and not cone:
         # get ray from mouse position for intersection testing
         ray_origin, ray_dir = get_ray_from_mouse(x, y)
@@ -1051,6 +1050,10 @@ def mouse_click(button, state, x, y):
             if not cube:
                 cube = True
             else:
+                soundplay = False
+                cube = False
+                ButtonCube.position = (-1.3, -0.5, -9)
+                pygame.mixer.Sound('assets/sound/friend_join.wav').play()
                 ButtonCube.rotation = [15, -25, -21]  # reset cube rotation
             return
         
